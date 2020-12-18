@@ -2,3 +2,4 @@
 /emoti_music.iml
 /.dart_tool/*
 /.idea/*
+/lib/secrets/spotify.dart
