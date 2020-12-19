@@ -14,12 +14,19 @@ class TrackBloc {
     getTracks(playlistId);
   }
 
+  sortTracks(List<CustomTrack> tracks) {
+    tracks.sort((a, b) {
+      return a.name.compareTo(b.name);
+    });
+    return  tracks;
+  }
+
   getTracks(playlistId) async {
-    _trackController.sink.add(await _trackRepository.getTracks(playlistId: playlistId));
+    _trackController.sink.add(sortTracks(await _trackRepository.getTracks(playlistId: playlistId)));
   }
 
   syncTracks(playlistId) async {
-    _trackController.sink.add(await _trackRepository.getTracks(playlistId: playlistId, sync: true));
+    _trackController.sink.add(sortTracks(await _trackRepository.getTracks(playlistId: playlistId, sync: true)));
   }
 
   updateTrack(CustomTrack track) async {

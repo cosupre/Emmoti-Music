@@ -1,13 +1,12 @@
-import 'package:emoti_music/bloc/trackBloc/bloc.dart';
 import 'package:emoti_music/main.dart';
 import 'package:emoti_music/models/playlist.dart';
 import 'package:emoti_music/models/user.dart';
 import 'package:emoti_music/ui/choosePlaylistPage.dart';
 import 'package:flutter/material.dart';
-import 'package:spotify/spotify.dart';
 
 class SettingsPage extends StatefulWidget {
-  SettingsPage({Key key, @required this.disconnect, @required this.registerPlaylist}) : super(key: key);
+  SettingsPage({Key key, @required this.disconnect, @required this.registerPlaylist})
+      : super(key: key);
 
   final Function disconnect;
   final Function registerPlaylist;
@@ -18,7 +17,6 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final CustomUser user = getIt<CustomUser>();
-  final SpotifyApi spotify = getIt<SpotifyApi>();
   CustomPlaylist playlist = getIt<CustomPlaylist>();
 
   @override
@@ -37,16 +35,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   Navigator.pushNamed(
                     context,
                     ChoosePlaylistPage.ROUTE_NAME,
-                    arguments: ChoosePlaylistPageArguments(validate: (CustomPlaylist newPlaylist) async {
-
-                      if (newPlaylist.id != playlist.id) {
-                        widget.registerPlaylist(newPlaylist);
-                        setState(() {
-                          playlist = newPlaylist;
-                        });
-                      }
-                      Navigator.pop(context);
-                    }),
+                    arguments: ChoosePlaylistPageArguments(
+                        validate: (CustomPlaylist newPlaylist) async {
+                          if (newPlaylist.id != playlist.id) {
+                            widget.registerPlaylist(newPlaylist);
+                            setState(() {
+                              playlist = newPlaylist;
+                            });
+                          }
+                          Navigator.pop(context);
+                        },),
                   );
                 },
               ),

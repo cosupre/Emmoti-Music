@@ -394,6 +394,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.9.2"
+  photo_view:
+    dependency: "direct main"
+    description:
+      name: photo_view
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.10.3"
   platform:
     dependency: transitive
     description:
@@ -521,9 +528,11 @@ packages:
   spotify:
     dependency: "direct main"
     description:
-      name: spotify
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "860ce95712013385397f8d11304255023813d6f2"
+      url: "../spotify-dart"
+    source: git
     version: "0.4.0"
   sqflite:
     dependency: "direct main"

@@ -1,13 +1,15 @@
 import 'package:emoti_music/main.dart';
+import 'package:emoti_music/models/credentials.dart';
 import 'package:emoti_music/models/playlist.dart';
 import 'package:emoti_music/models/user.dart';
 import 'package:flutter/material.dart';
 import 'package:spotify/spotify.dart' as spot;
+import 'package:spotify/spotify.dart';
 
 class ChoosePlaylistPage extends StatefulWidget {
   static const ROUTE_NAME = '/playlist-selection';
 
-  ChoosePlaylistPage({Key key, this.choosePlaylistPageArguments}) : super(key: key);
+  ChoosePlaylistPage({Key key, @required this.choosePlaylistPageArguments}) : super(key: key);
 
   final ChoosePlaylistPageArguments choosePlaylistPageArguments;
 
@@ -19,7 +21,7 @@ class _ChoosePlaylistPageState extends State<ChoosePlaylistPage> {
   spot.Pages<spot.PlaylistSimple> _playlists;
   bool loading = false;
 
-  spot.SpotifyApi spotify = getIt<spot.SpotifyApi>();
+  spot.SpotifyApi spotify  = getIt<SpotifyApi>();
   CustomUser user = getIt<CustomUser>();
   CustomPlaylist oldPlaylist;
 
@@ -27,12 +29,12 @@ class _ChoosePlaylistPageState extends State<ChoosePlaylistPage> {
   void initState() {
     super.initState();
     if (getIt.isRegistered<CustomPlaylist>()) oldPlaylist = getIt<CustomPlaylist>();
-
     _playlists = spotify.playlists.me;
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Choisissez une playlist'),

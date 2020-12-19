@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:emoti_music/bloc/trackBloc/bloc.dart';
 import 'package:emoti_music/models/credentials.dart';
 import 'package:emoti_music/models/playlist.dart';
 import 'package:emoti_music/models/user.dart';
@@ -27,8 +26,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
+        brightness: Brightness.dark,
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        scaffoldBackgroundColor: Colors.black,
+        buttonTheme: ButtonThemeData(
+          textTheme: ButtonTextTheme.primary,
+          buttonColor: Colors.white,
+        ),
       ),
       home: StartingPage(),
       debugShowCheckedModeBanner: false,
@@ -36,13 +41,24 @@ class MyApp extends StatelessWidget {
         var args = settings.arguments;
         var routes = {
           WebConnectionPage.ROUTE_NAME: (BuildContext _) => WebConnectionPage(webConnectionPageArguments: args),
-          ChoosePlaylistPage.ROUTE_NAME: (BuildContext _) => ChoosePlaylistPage(choosePlaylistPageArguments: args),
+          ChoosePlaylistPage.ROUTE_NAME: (BuildContext _) => ChoosePlaylistPage(
+                choosePlaylistPageArguments: args,
+              ),
         };
 
         return MaterialPageRoute(builder: routes[settings.name], settings: settings);
       },
     );
   }
+}
+
+Future<void> refreshCredentials(SpotifyApiCredentials creds) async {
+  Credentials credentials = Credentials.fromSpotifyApiCredentials(creds);
+  print("TOKEN REFRESH: ${creds.refreshToken}");
+
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  prefs.setString('credentials', jsonEncode(credentials.toJson()));
 }
 
 class StartingPage extends StatefulWidget {
@@ -80,9 +96,13 @@ class _StartingPageState extends State<StartingPage> {
   }
 
   Future<void> registerCredentials(SpotifyApi spotify) async {
-    Credentials credentials = Credentials.fromSpotifyApiCredentials(await spotify.getCredentials());
+    SpotifyApiCredentials creds = await spotify.getCredentials();
+    print('REFRESHTOKEN: ${creds.refreshToken}');
+
+    Credentials credentials = Credentials.fromSpotifyApiCredentials(creds);
+
     CustomUser user = CustomUser.fromUser(await spotify.me.get());
-    print(jsonEncode(user));
+
     final SharedPreferences prefs = await _prefs;
 
     setState(() {
@@ -108,11 +128,10 @@ class _StartingPageState extends State<StartingPage> {
   }
 
   Future<void> deleteCredentials() async {
-    Credentials credentials = Credentials('', '', active: false);
     final SharedPreferences prefs = await _prefs;
     setState(() {
-      futureCredentials = prefs.setString('credentials', jsonEncode(credentials.toJson())).then((bool success) {
-        return credentials;
+      futureCredentials = prefs.setString('credentials', '').then((bool success) {
+        return null;
       });
 
       futureUser = prefs.setString('user', '').then((bool success) {
@@ -123,6 +142,8 @@ class _StartingPageState extends State<StartingPage> {
         return null;
       });
     });
+
+    getIt.reset();
   }
 
   @override
@@ -137,10 +158,16 @@ class _StartingPageState extends State<StartingPage> {
                   future: futurePlaylist,
                   builder: (BuildContext context, AsyncSnapshot<CustomPlaylist> playlistSnapshot) {
                     return credSnapshot.hasData
-                        ? (credSnapshot.data.active && userSnapshot.hasData && userSnapshot.data != null
+                        ? (credSnapshot.data != null && userSnapshot.hasData && userSnapshot.data != null
                             ? Builder(
                                 builder: (BuildContext context) {
-                                  getIt.registerSingleton<SpotifyApi>(SpotifyApi(credSnapshot.data));
+                                  // don't redefine spotify if there is something in getIt
+                                  if (!getIt.isRegistered<SpotifyApi>()) {
+                                    SpotifyApi spotify = SpotifyApi(credSnapshot.data.toSpotifyApiCredentials(),
+                                        onCredentialsRefreshed: refreshCredentials);
+                                    spotify.getCredentials().then((value) => refreshCredentials(value));
+                                    getIt.registerSingleton<SpotifyApi>(spotify);
+                                  }
                                   getIt.registerSingleton<CustomUser>(userSnapshot.data);
                                   return playlistSnapshot.hasData && playlistSnapshot.data != null
                                       ? _buildHomeAndSetGetIt(
