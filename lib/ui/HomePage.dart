@@ -4,6 +4,7 @@ import 'package:emoti_music/models/playlist.dart';
 import 'package:emoti_music/models/track.dart';
 import 'package:emoti_music/ui/ListingPage.dart';
 import 'package:emoti_music/ui/SettingsPage.dart';
+import 'package:emoti_music/ui/emotionMapPage.dart';
 import 'package:emoti_music/ui/widgets/emotionCircle.dart';
 import 'package:flutter/material.dart';
 
@@ -43,7 +44,7 @@ class _HomePageState extends State<HomePage> {
             trackBloc: trackBloc,
             favoriteFirst: favoriteFirst,
           ),
-      (BuildContext context, snapshot, trackBloc, favoriteFirst) => EmotionCircle(
+      (BuildContext context, snapshot, trackBloc, favoriteFirst) => EmotionMapPage(
             snapshot: snapshot,
             trackBloc: trackBloc,
             favoriteFirst: favoriteFirst,
