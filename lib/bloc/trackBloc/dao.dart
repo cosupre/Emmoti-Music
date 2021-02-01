@@ -26,17 +26,23 @@ class TrackDao {
     return result;
   }
 
-  Future<int> deleteTrack(String id) async {
+  Future<int> deleteTrack(int id) async {
     final db = await dbProvider.database;
 
     var result = await db.delete(trackTABLE, where: 'id = ?', whereArgs: [id]);
     return result;
   }
 
-  Future<bool> exists(String id) async {
+  /*Future<bool> exists(int id) async {
     final db = await dbProvider.database;
     var result = await db.query(trackTABLE, where: 'id = ?', whereArgs: [id]);
     return result.isNotEmpty;
+  }*/
+
+  Future<int> getIdIfExists(webId, playlistId) async {
+    final db = await dbProvider.database;
+    var result = await db.query(trackTABLE, where: 'webId = ? AND playlistId = ?', whereArgs: [webId, playlistId]);
+    return result.isNotEmpty ? result.elementAt(0)['id'] : null;
   }
 
   deleteAll() async {

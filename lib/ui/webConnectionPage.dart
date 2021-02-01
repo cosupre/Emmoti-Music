@@ -1,8 +1,6 @@
 import 'dart:io';
 
-import 'package:emoti_music/secrets/spotify.dart';
 import 'package:flutter/material.dart';
-import 'package:spotify/spotify.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebConnectionPage extends StatefulWidget {

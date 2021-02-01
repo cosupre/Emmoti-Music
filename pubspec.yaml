@@ -24,8 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  spotify:
-    git: ../spotify-dart
+  spotify: ^0.5.1
   shared_preferences: ^0.5.12+4
   sqflite: ^1.3.2+1
   uni_links: ^0.4.0
@@ -35,6 +34,7 @@ dependencies:
   get_it: ^5.0.3
   path_provider: ^1.6.24
   photo_view: ^0.10.3
+  flutter_typeahead: ^2.0.0
 
 
   # The following adds the Cupertino Icons font to your application.

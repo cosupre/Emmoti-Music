@@ -1,5 +1,4 @@
 import 'package:emoti_music/main.dart';
-import 'package:emoti_music/models/credentials.dart';
 import 'package:emoti_music/models/playlist.dart';
 import 'package:emoti_music/models/user.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +20,11 @@ class _ChoosePlaylistPageState extends State<ChoosePlaylistPage> {
   spot.Pages<spot.PlaylistSimple> _playlists;
   bool loading = false;
 
-  spot.SpotifyApi spotify  = getIt<SpotifyApi>();
+  spot.SpotifyApi spotify = getIt<SpotifyApi>();
   CustomUser user = getIt<CustomUser>();
   CustomPlaylist oldPlaylist;
+
+  String newPlaylistName = '';
 
   @override
   void initState() {
@@ -34,7 +35,6 @@ class _ChoosePlaylistPageState extends State<ChoosePlaylistPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Choisissez une playlist'),
@@ -61,18 +61,109 @@ class _ChoosePlaylistPageState extends State<ChoosePlaylistPage> {
   }
 
   Widget _buildPlaylistListing(Iterable<spot.PlaylistSimple> items) {
-    return ListView.separated(
+    return ListView.builder(
       itemBuilder: (BuildContext context, int itemPosition) => _buildListTile(context, itemPosition, items),
-      separatorBuilder: (BuildContext context, int index) => Divider(),
-      itemCount: items.length,
+      itemCount: items.length + 1,
+    );
+  }
+
+  Widget _buildCreatePlaylist(BuildContext context) {
+    return Container(
+      child: ListTile(
+        leading: Stack(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundImage: null,
+              backgroundColor: Colors.white24,
+            ),
+            Icon(
+              Icons.add,
+              size: 41,
+              color: Colors.white,
+            ),
+          ],
+        ),
+        title: Text('Créer une playlist'),
+        onTap: () {
+          final _formKey = GlobalKey<FormState>();
+          showDialog(
+            context: context,
+            child: AlertDialog(
+              contentPadding: const EdgeInsets.all(8.0),
+              content: Row(
+                children: [
+                  Expanded(
+                    child: Form(
+                      key: _formKey,
+                      child: TextFormField(
+                        validator: (label) {
+                          if (label == null || label.isEmpty) return 'Ce nom ne peut pas être vide';
+                          return null;
+                        },
+                        onSaved: (label) {
+                          newPlaylistName = label;
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Annuler'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (_formKey.currentState.validate()) {
+                      Navigator.pop(context);
+                      _formKey.currentState.save();
+
+                      setState(() {
+                        loading = true;
+                      });
+
+                      try {
+                        Playlist playlist = await spotify.playlists.createPlaylist(user.id, newPlaylistName);
+                        CustomPlaylist newPlaylist = CustomPlaylist.fromPlaylistSimple(playlist);
+
+                        await widget.choosePlaylistPageArguments.validate(newPlaylist);
+                      } catch (e) {
+                        Scaffold.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Connection impossible'),
+                          ),
+                        );
+                      }
+                      setState(() {
+                        loading = false;
+                      });
+                    }
+                  },
+                  child: Text('Valider'),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
   Widget _buildListTile(BuildContext context, int itemPosition, Iterable<spot.PlaylistSimple> items) {
+    if (itemPosition == 0) {
+      return _buildCreatePlaylist(context);
+    }
+    itemPosition -= 1;
+
     spot.PlaylistSimple playlist = items.elementAt(itemPosition);
+
+    bool isCurrentPlaylist = oldPlaylist != null && oldPlaylist.id == playlist.id;
     return ListTile(
       title: Text('${playlist.name}'),
-      selected: oldPlaylist != null && oldPlaylist.id == playlist.id,
+      selectedTileColor: Colors.grey[900],
+      selected: isCurrentPlaylist,
       onTap: () async {
         CustomPlaylist newPlaylist = CustomPlaylist.fromPlaylistSimple(playlist);
         setState(() {

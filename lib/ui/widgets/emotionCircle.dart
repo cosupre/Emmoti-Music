@@ -1,16 +1,15 @@
 import 'dart:math';
 
-import 'package:emoti_music/bloc/trackBloc/bloc.dart';
 import 'package:emoti_music/models/track.dart';
 import 'package:emoti_music/ui/widgets/circleLayoutDelegate.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
 class EmotionCircle extends StatefulWidget {
-  EmotionCircle({Key key, @required this.tracks, @required this.trackBloc}) : super(key: key);
+  EmotionCircle({Key key, @required this.tracks, @required this.onTap}) : super(key: key);
 
   final List<CustomTrack> tracks;
-  final TrackBloc trackBloc;
+  final Function onTap;
 
   @override
   _EmotionCircleState createState() => _EmotionCircleState();
@@ -18,7 +17,6 @@ class EmotionCircle extends StatefulWidget {
 
 class _EmotionCircleState extends State<EmotionCircle> {
   List<CustomTrack> tracks;
-  TrackBloc trackBloc;
 
   double scale = 1.0;
   PhotoViewScaleStateController _scaleStateController;
@@ -27,7 +25,6 @@ class _EmotionCircleState extends State<EmotionCircle> {
   @override
   void initState() {
     tracks = widget.tracks;
-    trackBloc = widget.trackBloc;
     super.initState();
     _viewController = PhotoViewController()
       ..outputStateStream.listen((PhotoViewControllerValue value) {
@@ -47,10 +44,9 @@ class _EmotionCircleState extends State<EmotionCircle> {
 
   @override
   void didUpdateWidget(covariant EmotionCircle oldWidget) {
-    if (tracks != widget.tracks || trackBloc != widget.trackBloc) {
+    if (tracks != widget.tracks) {
       setState(() {
         tracks = widget.tracks;
-        trackBloc = widget.trackBloc;
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -87,8 +83,8 @@ class _EmotionCircleState extends State<EmotionCircle> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(380),
                       child: Container(
-                        width: trackDiameter / scale,
-                        height: trackDiameter / scale,
+                        width: trackDiameter / scale.clamp(1.0, 5.0),
+                        height: trackDiameter / scale.clamp(1.0, 5.0),
                         decoration: BoxDecoration(
                           image: DecorationImage(image: NetworkImage(tracks[index].imageUrl)),
                           color: Colors.black,
@@ -96,7 +92,9 @@ class _EmotionCircleState extends State<EmotionCircle> {
                           border: Border.all(color: Colors.black),
                         ),
                       ),
-                      onTap: () {},
+                      onTap: () {
+                        widget.onTap(tracks[index]);
+                      },
                     ),
                   ),
                 );
@@ -132,7 +130,7 @@ class _EmotionCircleState extends State<EmotionCircle> {
     y = y * middle / maxSquareRadius;
 
     var res = Offset(
-        (initial.dx - size.width / 2 + x) * (1 - 0.1 / scale), (initial.dy - size.height / 2 + y) * (1 - 0.1 / scale));
+        (initial.dx - size.width / 2 + x) * (1 - 0.1 / scale), (initial.dy - size.height / 2 - y) * (1 - 0.1 / scale));
     return res;
   }
 }

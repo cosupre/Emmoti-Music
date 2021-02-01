@@ -1,5 +1,6 @@
 import 'package:emoti_music/bloc/trackBloc/bloc.dart';
 import 'package:emoti_music/models/track.dart';
+import 'package:emoti_music/ui/trackInfoPage.dart';
 import 'package:emoti_music/ui/widgets/emotionCircle.dart';
 import 'package:flutter/material.dart';
 
@@ -60,7 +61,8 @@ class _EmotionMapPageState extends State<EmotionMapPage> {
 
                     return EmotionCircle(
                       tracks: tracks,
-                      trackBloc: trackBloc,
+                      onTap: (track) => Navigator.pushNamed(context, TrackInfoPage.ROUTE_NAME,
+                          arguments: TrackInfoPageArguments(track, trackBloc)),
                     );
                   },
                 )

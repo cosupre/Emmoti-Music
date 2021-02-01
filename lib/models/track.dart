@@ -5,7 +5,8 @@ import 'package:spotify/spotify.dart';
 class CustomTrack {
   List<String> artists;
   String name;
-  String id;
+  int id;
+  String webId;
   String uri;
 
   String playlistId;
@@ -20,25 +21,27 @@ class CustomTrack {
   double valence;
   double energy;
 
-  CustomTrack({this.id,
-    this.name,
-    this.uri,
-    this.artists,
-    this.albumId,
-    this.playlistId,
-    this.imageHeight,
-    this.imageWidth,
-    this.imageUrl,
-    this.favorite,
-    this.valence,
-    this.energy});
+  CustomTrack(
+      {this.id,
+      this.webId,
+      this.name,
+      this.uri,
+      this.artists,
+      this.albumId,
+      this.playlistId,
+      this.imageHeight,
+      this.imageWidth,
+      this.imageUrl,
+      this.favorite,
+      this.valence,
+      this.energy});
 
   factory CustomTrack.fromTrackAndFeature(Track track, AudioFeature feature, playlistId) {
     var album = track.album;
     var image = track.album.images?.elementAt(0);
     var artists = track.artists.map((e) => e.name).toList();
     return CustomTrack(
-      id: track.id,
+      webId: track.id,
       name: track.name,
       uri: track.uri,
       artists: artists,
@@ -53,9 +56,9 @@ class CustomTrack {
     );
   }
 
-  factory CustomTrack.fromDatabase(Map<String, dynamic> json) =>
-      CustomTrack(
+  factory CustomTrack.fromDatabase(Map<String, dynamic> json) => CustomTrack(
         id: json['id'],
+        webId: json['webId'],
         name: json['name'],
         uri: json['uri'],
         artists: jsonDecode(json['artists']).cast<String>(),
@@ -72,6 +75,7 @@ class CustomTrack {
   Map<String, dynamic> toDatabase() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    data['webId'] = this.webId;
     data['name'] = this.name;
     data['uri'] = this.uri;
     data['artists'] = jsonEncode(this.artists);

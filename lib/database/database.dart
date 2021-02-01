@@ -32,7 +32,8 @@ class DatabaseProvider {
 
   void initDB(Database database, int version) async {
     await database.execute("CREATE TABLE $trackTABLE ("
-        "id TEXT PRIMARY KEY, "
+        "id INTEGER PRIMARY KEY, "
+        "webId TEXT, "
         "name TEXT, "
         "uri TEXT, "
         "artists TEXT, "

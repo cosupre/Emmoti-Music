@@ -14,22 +14,26 @@ class TrackRepository {
     if (sync) {
       try {
         var tracks = await spotify.playlists.getTracksByPlaylistId(playlistId).all();
-        var trackIds = tracks.map((e) => e.id);
+        var trackIds = tracks.map((e) => e.id).toList();
         var features = await spotify.audioFeatures.list(trackIds);
 
         List<CustomTrack> customTracks = List<CustomTrack>.generate(tracks.length,
-                (index) =>
-                CustomTrack.fromTrackAndFeature(tracks.elementAt(index), features.elementAt(index), playlistId));
+            (index) => CustomTrack.fromTrackAndFeature(tracks.elementAt(index), features.elementAt(index), playlistId));
 
         await Future.forEach(customTracks, (element) async {
-          var searchInOldList = oldTracks.where((old) => old.id == element.id).toList();
+          var searchInOldList = oldTracks.where((old) => old.webId == element.webId).toList();
           if (searchInOldList.isNotEmpty) {
             element.favorite = searchInOldList.first.favorite;
           }
 
-          oldTracks.removeWhere((old) => old.id == element.id);
+          oldTracks.removeWhere((old) => old.webId == element.webId);
+          element.id = await trackDao.getIdIfExists(element.webId, playlistId);
 
-          trackDao.exists(element.id).then((exists) => exists ? trackDao.updateTrack(element) : trackDao.createTrack(element));
+          if (element.id != null) {
+            trackDao.updateTrack(element);
+          } else {
+            element.id = await trackDao.createTrack(element);
+          }
         });
 
         oldTracks.forEach((element) => trackDao.deleteTrack(element.id));
@@ -51,7 +55,7 @@ class TrackRepository {
 
   Future<CustomTrack> createTrack(CustomTrack track) async {
     spotify.playlists.addTrack(track.uri, track.playlistId);
-    await trackDao.createTrack(track);
+    track.id = await trackDao.createTrack(track);
     return track;
   }
 
