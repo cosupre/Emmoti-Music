@@ -73,7 +73,14 @@ class _EmotionCircleState extends State<EmotionCircle> {
             margin: EdgeInsets.all(margin),
             width: diameter,
             height: diameter,
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(380)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              image: DecorationImage(
+                image: AssetImage('assets/circle.jpg'),
+                fit: BoxFit.cover,
+              ),
+              borderRadius: BorderRadius.circular(380),
+            ),
             child: Builder(
               builder: (BuildContext context) {
                 List<LayoutId> items = List.generate(
